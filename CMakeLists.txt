@@ -1,21 +1,25 @@
 cmake_minimum_required(VERSION 2.8)
 project(weston_image)
 
-include_directories(src)
-include_directories(src/shared)
-include_directories(src/protocol)
-include_directories(/usr/include/cairo)
-include_directories(/usr/include/pixman-1)
+find_package(PkgConfig)
+pkg_check_modules(cairo REQUIRED cairo)
+pkg_check_modules(pixman REQUIRED pixman-1)
 
-# TODO: set correct paths
+include_directories(src src/shared src/protocol)
+
+#add_definitions(-Wall -Wextra -Werror)
+
 add_definitions(-DLIBEXECDIR="/usr/lib/weston")
 add_definitions(-DDATADIR="/usr/share")
 
 file(GLOB_RECURSE SRC src/*.c)
-message(${SRC})
 
 add_executable(weston_image ${SRC} ${WL_PROT_SRC})
-target_link_libraries(weston_image "-lwayland-client;-lcairo;-lpixman-1;-lpng;-lm")
+target_include_directories(weston_image PUBLIC ${cairo_INCLUDE_DIRS} ${pixman_INCLUDE_DIRS})
+
+target_link_libraries(weston_image "-lwayland-client;-lpng;-lm")
+
+target_link_libraries(weston_image ${cairo_LIBRARIES} ${pixman_LIBRARIES})
 target_link_libraries(weston_image "-lwayland-cursor")
 target_link_libraries(weston_image "-lxkbcommon")
 target_link_libraries(weston_image "-ljpeg")
